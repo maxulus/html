@@ -56,6 +56,14 @@
         const repoOwner = "maxulus"; // Twoja nazwa użytkownika
         const repoName = "html"; // Nazwa repozytorium
 
+        // Funkcja do normalizacji nazw plików
+        function normalizeFileName(fileName) {
+            return fileName
+                .toLowerCase() // Wszystkie małe litery
+                .replace(/[^a-z0-9-]/g, '-') // Zamiana niedozwolonych znaków na myślnik
+                .replace(/-+/g, '-'); // Usunięcie podwójnych myślników
+        }
+
         async function fetchFileList() {
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
             const fileListElement = document.getElementById("file-list");
@@ -79,10 +87,13 @@
                         li.appendChild(numberSpan);
 
                         // Link do pliku
-                        const fileUrl = `https://${repoOwner}.github.io/${repoName}/${file.name}`;
+                        const originalFileName = file.name;
+                        const normalizedFileName = normalizeFileName(originalFileName);
+                        const fileUrl = `https://${repoOwner}.github.io/${repoName}/${originalFileName}`;
+                        
                         const link = document.createElement("a");
                         link.href = fileUrl;
-                        link.textContent = file.name;
+                        link.textContent = originalFileName;
                         li.appendChild(link);
 
                         // Przycisk udostępniania na WhatsApp
