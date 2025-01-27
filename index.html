@@ -18,11 +18,14 @@
             padding: 0;
         }
         li {
-            margin: 5px 0;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
         }
         a {
             text-decoration: none;
             color: #007BFF;
+            margin-right: 10px;
         }
         a:hover {
             text-decoration: underline;
@@ -31,6 +34,17 @@
             font-weight: bold;
             margin-right: 5px;
             color: #555;
+        }
+        .share {
+            margin-left: auto;
+            text-decoration: none;
+            color: #25D366;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        .share-icon {
+            margin-right: 5px;
         }
     </style>
 </head>
@@ -66,9 +80,21 @@
 
                         // Link do pliku
                         const link = document.createElement("a");
-                        link.href = `https://${repoOwner}.github.io/${repoName}/${file.name}`;
+                        const fileUrl = `https://${repoOwner}.github.io/${repoName}/${file.name}`;
+                        link.href = fileUrl;
                         link.textContent = file.name;
                         li.appendChild(link);
+
+                        // Przycisk udostępniania na WhatsApp
+                        const shareLink = document.createElement("a");
+                        shareLink.classList.add("share");
+                        shareLink.href = `https://api.whatsapp.com/send?text=Check this out: ${encodeURIComponent(fileUrl)}`;
+                        shareLink.target = "_blank";
+                        shareLink.innerHTML = `
+                            <span class="share-icon">📱</span>
+                            Share on WhatsApp
+                        `;
+                        li.appendChild(shareLink);
 
                         fileListElement.appendChild(li);
                         counter++; // Zwiększ licznik
