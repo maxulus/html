@@ -79,8 +79,8 @@
                         li.appendChild(numberSpan);
 
                         // Link do pliku
-                        const link = document.createElement("a");
                         const fileUrl = `https://${repoOwner}.github.io/${repoName}/${file.name}`;
+                        const link = document.createElement("a");
                         link.href = fileUrl;
                         link.textContent = file.name;
                         li.appendChild(link);
@@ -88,7 +88,7 @@
                         // Przycisk udostępniania na WhatsApp
                         const shareLink = document.createElement("a");
                         shareLink.classList.add("share");
-                        shareLink.href = `https://api.whatsapp.com/send?text=Check this out: ${encodeURIComponent(fileUrl)}`;
+                        shareLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(`Check this out: ${fileUrl}`)}`;
                         shareLink.target = "_blank";
                         shareLink.innerHTML = `
                             <span class="share-icon">📱</span>
