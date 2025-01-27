@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+        }
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>HTML Files in the 'publik' Folder</h1>
+    <ul id="file-list"></ul>
+
+    <script>
+        const repoOwner = "maxulus"; // Zastąp swoją nazwą użytkownika
+        const repoName = "html"; // Zastąp nazwą swojego repozytorium
+        const folderPath = "html";
+
+        async function fetchFileList() {
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${folderPath}`;
+            const fileListElement = document.getElementById("file-list");
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error("Failed to fetch file list");
+
+                const files = await response.json();
+
+                files
+                    .filter(file => file.name.endsWith(".html"))
+                    .forEach(file => {
+                        const li = document.createElement("li");
+                        const link = document.createElement("a");
+                        link.href = `https://${repoOwner}.github.io/${repoName}/${folderPath}/${file.name}`;
+                        link.textContent = file.name;
+                        li.appendChild(link);
+                        fileListElement.appendChild(li);
+                    });
+            } catch (error) {
+                console.error("Error fetching file list:", error);
+                fileListElement.innerHTML = `<li>Failed to load file list. Please try again later.</li>`;
+            }
+        }
+
+        fetchFileList();
+    </script>
+</body>
+</html>
