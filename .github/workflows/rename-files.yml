@@ -40,12 +40,12 @@ jobs:
           if (fs.existsSync(directory)) {
             fs.readdirSync(directory).forEach(file => {
               const filePath = path.join(directory, file);
-              console.log('Processing file: ' + file);
+              console.log('Processing file: ' + filePath);
               if (file.endsWith('.html')) {
                 let newName = removePolishChars(file).replace(problematicChars, '');
                 console.log('New name: ' + newName);
                 fs.renameSync(filePath, path.join(directory, newName));
-                console.log('Renamed: ' + file + ' -> ' + newName);
+                console.log('Renamed: ' + filePath + ' -> ' + path.join(directory, newName));
               }
             });
           } else {
