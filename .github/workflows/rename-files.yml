@@ -29,14 +29,21 @@ jobs:
           node -e "
           const fs = require('fs');
           const path = require('path');
-          const problematicChars = /[^\w.-]/g;
+          const problematicChars = /[^a-zA-Z0-9]/g;
           const directory = './html';
+          const removePolishChars = (str) => {
+            const polishChars = {
+              'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n', 'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
+              'Ą': 'A', 'Ć': 'C', 'Ę': 'E', 'Ł': 'L', 'Ń': 'N', 'Ó': 'O', 'Ś': 'S', 'Ź': 'Z', 'Ż': 'Z'
+            };
+            return str.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, char => polishChars[char] || char);
+          };
           if (fs.existsSync(directory)) {
             fs.readdirSync(directory).forEach(file => {
               const filePath = path.join(directory, file);
               console.log('Processing file: ' + file);
-              if (file.endsWith('.html') && problematicChars.test(file)) {
-                const newName = file.replace(problematicChars, '-');
+              if (file.endsWith('.html')) {
+                let newName = removePolishChars(file).replace(problematicChars, '');
                 fs.renameSync(filePath, path.join(directory, newName));
                 console.log('Renamed: ' + file + ' -> ' + newName);
               }
