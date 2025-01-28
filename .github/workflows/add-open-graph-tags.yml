@@ -1,4 +1,5 @@
 name: Add Open Graph Tags
+
 on:
   push:
     branches:
@@ -26,7 +27,7 @@ jobs:
           const path = require('path');
           const directory = '.'; 
           
-          // Wyrażenie regularne do wyszukiwania linków do plików .jpg w tagach <meta>
+          // Wyrażenie regularne do wyszukiwania linków do plików .jpg w tagach og:image i twitter:image
           const metaTagPattern = /<meta[^>]*content=['\"]([^'\"]+\.jpg)['\"][^>]*>/i;
           
           let changesMade = false;  // Flaga oznaczająca, czy dokonano zmian
@@ -36,25 +37,31 @@ jobs:
             files.forEach(file => {
               const filePath = path.join(directory, file);
               if (file.endsWith('.html') && file !== 'index.html') {
+                console.log('Processing file: ' + filePath);
+                
+                // Odczytaj plik HTML
                 let content = fs.readFileSync(filePath, 'utf8');
                 
-                // Przeszukaj tylko tagi <meta> w pliku HTML
-                const metaTags = content.match(/<meta[^>]*>/g);
-                
+                // Ogranicz przetwarzanie tylko do pierwszych 25 linii
+                const first25Lines = content.split('\n').slice(0, 25).join('\n');
+
+                // Znajdź wszystkie tagi meta w pierwszych 25 liniach
+                const metaTags = first25Lines.match(/<meta[^>]*>/g);
                 if (metaTags) {
+                  console.log('Found meta tags in first 25 lines:', metaTags);
                   let imageLink = null;
 
-                  // Sprawdź każdy tag <meta> pod kątem linku do obrazu .jpg
+                  // Sprawdź każdy tag meta
                   metaTags.forEach(tag => {
                     const match = tag.match(metaTagPattern);
                     if (match && match[1]) {
-                      imageLink = match[1];  // Znaleziono link do obrazu
+                      imageLink = match[1];
+                      console.log('Found image link:', imageLink);
                     }
                   });
 
                   if (imageLink) {
                     const ogTag = \`<meta property="og:image" content="\${imageLink}">\`;
-                    // Dodaj tag og:image, jeśli nie ma go w pliku
                     if (!content.includes('og:image')) {
                       content = content.replace(/<\/head>/, ogTag + '</head>');
                       fs.writeFileSync(filePath, content, 'utf8');
@@ -67,20 +74,20 @@ jobs:
                     console.log('No .jpg image found in meta tags of ' + filePath);
                   }
                 } else {
-                  console.log('No meta tags found in: ' + filePath);
+                  console.log('No meta tags found in the first 25 lines of: ' + filePath);
                 }
               }
             });
-
-            // Log końcowy
-            if (changesMade) {
-              console.log('Open Graph tags were successfully added.');
-            } else {
-              console.log('No changes were made. No Open Graph tags were added.');
-            }
           } else {
             console.error('Directory not found: ' + directory);
             process.exit(1);
+          }
+
+          // Na koniec dodajemy log, który informuje o zakończeniu operacji
+          if (changesMade) {
+            console.log('Open Graph tags were successfully added.');
+          } else {
+            console.log('No changes were made. No Open Graph tags were added.');
           }
           "
         shell: /usr/bin/bash -e {0}
