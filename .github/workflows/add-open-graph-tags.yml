@@ -24,9 +24,11 @@ jobs:
           node -e "
           const fs = require('fs');
           const path = require('path');
-          const directory = '.';
-          const ogTagPattern = /<meta[^>]*property=\"og:image\"[^>]*content=\"([^\"]+)\"[^>]*>/;
-          const twitterTagPattern = /<meta[^>]*name=\"twitter:image\"[^>]*content=\"([^\"]+)\"[^>]*>/;
+          const directory = '.'; 
+          
+          // Wyrażenie regularne do wyszukiwania linków do plików .jpg w tagach og:image i twitter:image
+          const ogTagPattern = /<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([^\"]+\.jpg)[\"'][^>]*>/;
+          const twitterTagPattern = /<meta[^>]*name=[\"']twitter:image[\"'][^>]*content=[\"']([^\"]+\.jpg)[\"'][^>]*>/;
           
           let changesMade = false;  // Flaga oznaczająca, czy dokonano zmian
           
@@ -45,7 +47,7 @@ jobs:
                 let imageLink = ogImageMatch ? ogImageMatch[1] : (twitterImageMatch ? twitterImageMatch[1] : null);
 
                 if (imageLink) {
-                  const ogTag = '<meta property=\"og:image\" content=\"' + imageLink + '\">';
+                  const ogTag = \`<meta property="og:image" content="\${imageLink}">\`;
                   if (!content.includes('og:image')) { 
                     content = content.replace('</head>', ogTag + '</head>');
                     fs.writeFileSync(filePath, content, 'utf8');
