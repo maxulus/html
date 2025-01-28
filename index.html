@@ -3,66 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Files in Repository</title>
+    <title>File List</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f9f9f9;
-        }
-        h1 {
-            color: #333;
+            margin: 20px;
         }
         ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
         }
         li {
             margin: 10px 0;
-            display: flex;
-            align-items: center;
-        }
-        a {
-            text-decoration: none;
-            color: #007BFF;
-            margin-right: 10px;
-        }
-        a:hover {
-            text-decoration: underline;
         }
         .number {
             font-weight: bold;
-            margin-right: 5px;
-            color: #555;
         }
         .share {
-            margin-left: auto;
+            margin-left: 10px;
             text-decoration: none;
-            color: #25D366;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
+            color: blue;
         }
-        .share-icon {
-            margin-right: 5px;
+        .share:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <h1>HTML Files in the Repository</h1>
+    <h1>HTML File List</h1>
     <ul id="file-list"></ul>
 
     <script>
-        const repoOwner = "maxulus"; // Twoja nazwa użytkownika
-        const repoName = "html"; // Nazwa repozytorium
-
-        // Funkcja do normalizacji nazw plików
-        function normalizeFileName(fileName) {
-            return fileName
-                .toLowerCase() // Wszystkie małe litery
-                .replace(/[^a-z0-9-]/g, '-') // Zamiana niedozwolonych znaków na myślnik
-                .replace(/-+/g, '-'); // Usunięcie podwójnych myślników
-        }
+        const repoOwner = "maxulus"; // Nazwa użytkownika
+        const repoName = "html";     // Nazwa repozytorium
 
         async function fetchFileList() {
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
@@ -73,7 +46,7 @@
                 if (!response.ok) throw new Error("Failed to fetch file list");
 
                 const files = await response.json();
-                let counter = 1; // Zmienna do numeracji
+                let counter = 1;
 
                 files
                     .filter(file => file.name.endsWith(".html"))
@@ -86,20 +59,18 @@
                         numberSpan.textContent = `${counter}. `;
                         li.appendChild(numberSpan);
 
-                        // Link do pliku
-                        const originalFileName = file.name;
-                        const normalizedFileName = normalizeFileName(originalFileName);
-                        const fileUrl = `https://${repoOwner}.github.io/${repoName}/${originalFileName}`;
-                        
+                        // Link do pliku (kodowanie URL)
+                        const fileUrl = `https://${repoOwner}.github.io/${repoName}/${encodeURIComponent(file.name)}`;
                         const link = document.createElement("a");
                         link.href = fileUrl;
-                        link.textContent = originalFileName;
+                        link.textContent = file.name;
                         li.appendChild(link);
 
-                        // Przycisk udostępniania na WhatsApp
+                        // Przycisk udostępniania (kodowanie URL)
                         const shareLink = document.createElement("a");
                         shareLink.classList.add("share");
-                        shareLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(`Check this out: ${fileUrl}`)}`;
+                        const whatsappMessage = `Check this out: ${fileUrl}`;
+                        shareLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappMessage)}`;
                         shareLink.target = "_blank";
                         shareLink.innerHTML = `
                             <span class="share-icon">📱</span>
@@ -108,7 +79,7 @@
                         li.appendChild(shareLink);
 
                         fileListElement.appendChild(li);
-                        counter++; // Zwiększ licznik
+                        counter++;
                     });
             } catch (error) {
                 console.error("Error fetching file list:", error);
