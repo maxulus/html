@@ -8,7 +8,7 @@ permissions:
   contents: write
 jobs:
   rename-files:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -27,6 +27,7 @@ jobs:
           const directory = './html';
           fs.readdirSync(directory).forEach(file => {
             const filePath = path.join(directory, file);
+            console.log(`Processing file: ${file}`);
             if (file.endsWith('.html') && problematicChars.test(file)) {
               const newName = file.replace(problematicChars, '-');
               fs.renameSync(filePath, path.join(directory, newName));
