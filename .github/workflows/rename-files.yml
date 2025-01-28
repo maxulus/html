@@ -1,11 +1,10 @@
 name: Rename Files
-
 on:
   push:
     branches:
       - main
     paths:
-      - "html/*.html"
+      - "*.html"
   workflow_dispatch:
 permissions:
   contents: write
@@ -21,8 +20,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: List files in html directory
-        run: ls -la ./html
+      - name: List files in root directory before renaming
+        run: ls -la
 
       - name: Rename problematic files
         run: |
@@ -30,7 +29,7 @@ jobs:
           const fs = require('fs');
           const path = require('path');
           const problematicChars = /[^a-zA-Z0-9]/g;
-          const directory = './html';
+          const directory = '.';
           const removePolishChars = (str) => {
             const polishChars = {
               'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n', 'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
@@ -44,7 +43,7 @@ jobs:
             files.forEach(file => {
               const filePath = path.join(directory, file);
               console.log('Processing file: ' + filePath);
-              if (file === 'Elon Musk, to najpotężniejszy człowiek świata. Zobacz jego biznesy, przyjaciół i ambicje (27.01.2025 15：41：08).html') {
+              if (file.endsWith('.html')) {
                 let newName = removePolishChars(file).replace(problematicChars, '');
                 console.log('New name: ' + newName);
                 fs.renameSync(filePath, path.join(directory, newName));
