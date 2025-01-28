@@ -39,7 +39,7 @@
         .email-share {
             margin-left: 10px;
             text-decoration: none;
-            color: #D44638; /* Czerwony kolor Gmail */
+            color: #D44638; /* Gmail's red color */
             font-weight: bold;
         }
         .email-share:hover {
@@ -55,8 +55,8 @@
     <ul id="file-list"></ul>
 
     <script>
-        const repoOwner = "maxulus"; // Nazwa użytkownika
-        const repoName = "html";     // Nazwa repozytorium
+        const repoOwner = "maxulus"; // Your GitHub username
+        const repoName = "html";     // Your repository name
 
         async function fetchFileList() {
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
@@ -87,14 +87,15 @@
                         li.appendChild(link);
 
                         // Pobierz pierwszy obrazek z pliku HTML
-                        const imageUrl = await extractFirstImage(fileUrl);
+                        const imageBase64 = await extractFirstImage(fileUrl);
 
                         // Link WhatsApp
                         const whatsappLink = document.createElement("a");
                         whatsappLink.classList.add("share");
-                        const whatsappText = imageUrl
-                            ? `Check this out: ${fileUrl}\n\nMedia: ${imageUrl}`
-                            : `Check this out: ${fileUrl}`;
+                        let whatsappText = `Check this out: ${fileUrl}`;
+                        if (imageBase64) {
+                            whatsappText += `\n\n[Preview Embedded Image]: ${imageBase64}`;
+                        }
                         whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappText)}`;
                         whatsappLink.target = "_blank";
                         whatsappLink.innerHTML = `<span class="icon">📱</span>WhatsApp`;
@@ -104,7 +105,11 @@
                         const emailLink = document.createElement("a");
                         emailLink.classList.add("email-share");
                         const emailSubject = encodeURIComponent("Check out this article!");
-                        const emailBody = encodeURIComponent(`Check out this article: ${file.name}\n\nLink: ${fileUrl}`);
+                        const emailBody = encodeURIComponent(
+                            `Check out this article: ${file.name}\n\nLink: ${fileUrl}\n\n${
+                                imageBase64 ? `[Embedded Image Preview]: ${imageBase64}` : ""
+                            }`
+                        );
                         emailLink.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
                         emailLink.innerHTML = `<span class="icon">✉️</span>E-mail`;
                         li.appendChild(emailLink);
@@ -125,9 +130,17 @@
                 if (!response.ok) throw new Error("Failed to fetch HTML content");
                 const html = await response.text();
                 const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const img = doc.querySelector('img'); // Znajdź pierwszy obrazek w pliku HTML
-                return img ? img.src : null; // Jeśli znajdziesz obrazek, zwróć jego źródło
+                const doc = parser.parseFromString(html, "text/html");
+                const img = doc.querySelector("img"); // Znajdź pierwszy obrazek w pliku HTML
+
+                if (img && img.src.startsWith("data:image/")) {
+                    // Jeśli obrazek jest osadzony jako Base64, wyciągnij krótki fragment
+                    return img.src.substring(0, 200) + "... [Base64 Truncated]";
+                } else if (img) {
+                    // Jeśli obrazek ma pełny URL, zwróć go
+                    return new URL(img.src, url).href;
+                }
+                return null; // Brak obrazka
             } catch (error) {
                 console.error(`Error extracting image from ${url}:`, error);
                 return null; // W przypadku błędu zwróć null
