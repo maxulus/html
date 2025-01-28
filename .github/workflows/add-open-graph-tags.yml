@@ -30,7 +30,7 @@ jobs:
           node -e "
             const fs = require('fs');
             const path = require('path');
-            const directory = './html-files'; 
+            const directory = './';  // Adjust this to point to the correct folder
 
             // Regular expression to find .jpg image links in meta tags
             const metaTagPattern = /<meta[^>]*content=['\"]([^'\"]+\.jpg)['\"][^>]*>/i;
