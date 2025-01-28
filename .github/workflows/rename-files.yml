@@ -38,7 +38,9 @@ jobs:
             return str.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, char => polishChars[char] || char);
           };
           if (fs.existsSync(directory)) {
-            fs.readdirSync(directory).forEach(file => {
+            const files = fs.readdirSync(directory);
+            console.log('Files in directory:', files);
+            files.forEach(file => {
               const filePath = path.join(directory, file);
               console.log('Processing file: ' + filePath);
               if (file.endsWith('.html')) {
