@@ -1,0 +1,45 @@
+name: Rename Files
+on:
+  push:
+    paths:
+      - "*.html"
+
+jobs:
+  rename-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Rename HTML files
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = require('path');
+          const problematicChars = /[^\w.-]/g;
+          fs.readdirSync('./').forEach(file => {
+            if (file.endsWith('.html') && problematicChars.test(file)) {
+              const newName = file.replace(problematicChars, '-');
+              fs.renameSync(file, newName);
+              console.log(`Renamed: ${file} -> ${newName}`);
+            }
+          });
+          "
+
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git add .
+          git commit -m "Rename problematic HTML files" || echo "No changes to commit"
+
+      - name: Push changes
+        run: git push
