@@ -1,0 +1,16 @@
+name: Trigger Add Open Graph Tags
+on:
+  workflow_run:
+    workflows: ["Rename Files"]  # Zależność od workflow Rename Files
+    types:
+      - completed
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Add Open Graph Tags
+        uses: ./.github/workflows/add-open-graph-tags.yml  # Uruchomienie workflow add-open-graph-tags.yml
