@@ -43,7 +43,7 @@ jobs:
             files.forEach(file => {
               const filePath = path.join(directory, file);
               console.log('Processing file: ' + filePath);
-              if (file.endsWith('.html')) {
+              if (file.endsWith('.html') && file !== 'index.html') {
                 let newName = removePolishChars(file).replace(problematicChars, '');
                 newName = newName.replace(/\.html$/, '') + '.html'; // Zachowaj kropkę przed rozszerzeniem
                 console.log('New name: ' + newName);
