@@ -20,12 +20,9 @@ jobs:
         with:
           node-version: 18
 
-      - name: Ensure html directory exists
+      - name: Create html directory if it does not exist
         run: |
-          if [ ! -d "./html" ]; then
-            echo "Directory not found: ./html"
-            exit 1
-          fi
+          mkdir -p ./html
 
       - name: Rename problematic files
         run: |
@@ -34,15 +31,20 @@ jobs:
           const path = require('path');
           const problematicChars = /[^\w.-]/g;
           const directory = './html';
-          fs.readdirSync(directory).forEach(file => {
-            const filePath = path.join(directory, file);
-            console.log('Processing file: ' + file);
-            if (file.endsWith('.html') && problematicChars.test(file)) {
-              const newName = file.replace(problematicChars, '-');
-              fs.renameSync(filePath, path.join(directory, newName));
-              console.log('Renamed: ' + file + ' -> ' + newName);
-            }
-          });
+          if (fs.existsSync(directory)) {
+            fs.readdirSync(directory).forEach(file => {
+              const filePath = path.join(directory, file);
+              console.log('Processing file: ' + file);
+              if (file.endsWith('.html') && problematicChars.test(file)) {
+                const newName = file.replace(problematicChars, '-');
+                fs.renameSync(filePath, path.join(directory, newName));
+                console.log('Renamed: ' + file + ' -> ' + newName);
+              }
+            });
+          } else {
+            console.error('Directory not found: ' + directory);
+            process.exit(1);
+          }
           "
 
       - name: Commit changes
