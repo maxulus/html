@@ -1,57 +1,53 @@
-node -e "
 const fs = require('fs');
 const path = require('path');
 const directory = '.';
 
-// Wyrażenie regularne do wyszukiwania linków do plików .jpg w tagach meta
 const metaTagPattern = /<meta[^>]*content=['\"]([^'\"]+\.jpg)['\"][^>]*>/i;
 
-let changesMade = false; // Flaga zmian
+let changesMade = false;
 
 if (fs.existsSync(directory)) {
   const files = fs.readdirSync(directory);
   files.forEach(file => {
     const filePath = path.join(directory, file);
     if (file.endsWith('.html') && file !== 'index.html') {
-      // Odczytaj tylko pierwsze 20 linii pliku
-      const content = fs.readFileSync(filePath, 'utf8');
-      const firstLines = content.split('\n').slice(0, 20).join('\n'); 
+      try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        const firstLines = content.split('\n').slice(0, 20).join('\n');
 
-      // Przeszukaj tagi <meta> w pierwszych 20 liniach
-      const metaTags = firstLines.match(/<meta[^>]*>/g);
-      
-      if (metaTags) {
-        let imageLink = null;
+        const metaTags = firstLines.match(/<meta[^>]*>/g);
+        if (metaTags) {
+          let imageLink = null;
 
-        // Sprawdź tagi <meta> pod kątem obrazów .jpg
-        metaTags.forEach(tag => {
-          const match = tag.match(metaTagPattern);
-          if (match && match[1]) {
-            imageLink = match[1]; // Znaleziono link do obrazu
-          }
-        });
+          metaTags.forEach(tag => {
+            const match = tag.match(metaTagPattern);
+            if (match && match[1]) {
+              imageLink = match[1];
+            }
+          });
 
-        if (imageLink) {
-          const ogTag = `<meta property="og:image" content="${imageLink}">`;
-          // Dodaj tag og:image, jeśli jeszcze go nie ma
-          if (!content.includes('og:image')) {
-            const updatedContent = content.replace(/<\/head>/, ogTag + '</head>');
-            fs.writeFileSync(filePath, updatedContent, 'utf8');
-            console.log(`Added Open Graph tag to: ${filePath}`);
-            changesMade = true;
+          if (imageLink) {
+            const ogTag = `<meta property="og:image" content="${imageLink}">`;
+            if (!content.includes('og:image')) {
+              const updatedContent = content.replace(/<\/head>/, ogTag + '</head>');
+              fs.writeFileSync(filePath, updatedContent, 'utf8');
+              console.log(`Added Open Graph tag to: ${filePath}`);
+              changesMade = true;
+            } else {
+              console.log(`Open Graph tag already exists in: ${filePath}`);
+            }
           } else {
-            console.log(`Open Graph tag already exists in: ${filePath}`);
+            console.log(`No .jpg image found in meta tags of ${filePath}`);
           }
         } else {
-          console.log(`No .jpg image found in meta tags of ${filePath}`);
+          console.log(`No meta tags found in ${filePath}`);
         }
-      } else {
-        console.log(`No meta tags found in ${filePath}`);
+      } catch (error) {
+        console.error(`Error processing file ${filePath}: ${error.message}`);
       }
     }
   });
 
-  // Log końcowy
   if (changesMade) {
     console.log('Open Graph tags were successfully added.');
   } else {
@@ -61,4 +57,3 @@ if (fs.existsSync(directory)) {
   console.error(`Directory not found: ${directory}`);
   process.exit(1);
 }
-"
