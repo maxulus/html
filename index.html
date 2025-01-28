@@ -86,15 +86,15 @@
                         link.textContent = file.name;
                         li.appendChild(link);
 
-                        // Pobierz pierwszy obrazek z pliku HTML
-                        const imageBase64 = await extractFirstImage(fileUrl);
+                        // Pobierz obrazek z meta tagu og:image
+                        const metaImageUrl = await extractMetaImage(fileUrl);
 
                         // Link WhatsApp
                         const whatsappLink = document.createElement("a");
                         whatsappLink.classList.add("share");
                         let whatsappText = `Check this out: ${fileUrl}`;
-                        if (imageBase64) {
-                            whatsappText += `\n\n[Preview Embedded Image]: ${imageBase64}`;
+                        if (metaImageUrl) {
+                            whatsappText += `\n\n[Preview Image]: ${metaImageUrl}`;
                         }
                         whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappText)}`;
                         whatsappLink.target = "_blank";
@@ -107,7 +107,7 @@
                         const emailSubject = encodeURIComponent("Check out this article!");
                         const emailBody = encodeURIComponent(
                             `Check out this article: ${file.name}\n\nLink: ${fileUrl}\n\n${
-                                imageBase64 ? `[Embedded Image Preview]: ${imageBase64}` : ""
+                                metaImageUrl ? `[Preview Image]: ${metaImageUrl}` : ""
                             }`
                         );
                         emailLink.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
@@ -124,25 +124,26 @@
             }
         }
 
-        async function extractFirstImage(url) {
+        /**
+         * Extracts the absolute URL of the og:image meta tag from an HTML file.
+         * @param {string} url - The URL of the HTML file.
+         * @returns {string|null} The content of the og:image meta tag or null if not found.
+         */
+        async function extractMetaImage(url) {
             try {
                 const response = await fetch(url);
                 if (!response.ok) throw new Error("Failed to fetch HTML content");
                 const html = await response.text();
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, "text/html");
-                const img = doc.querySelector("img"); // Znajdź pierwszy obrazek w pliku HTML
+                const metaTag = doc.querySelector('meta[property="og:image"]');
 
-                if (img && img.src.startsWith("data:image/")) {
-                    // Jeśli obrazek jest osadzony jako Base64, wyciągnij krótki fragment
-                    return img.src.substring(0, 200) + "... [Base64 Truncated]";
-                } else if (img) {
-                    // Jeśli obrazek ma pełny URL, zwróć go
-                    return new URL(img.src, url).href;
+                if (metaTag && metaTag.content) {
+                    return metaTag.content; // Zwraca URL obrazu
                 }
-                return null; // Brak obrazka
+                return null; // Brak obrazu
             } catch (error) {
-                console.error(`Error extracting image from ${url}:`, error);
+                console.error(`Error extracting meta image from ${url}:`, error);
                 return null; // W przypadku błędu zwróć null
             }
         }
