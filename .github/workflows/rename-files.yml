@@ -21,8 +21,7 @@ jobs:
           node-version: 18
 
       - name: Create html directory if it does not exist
-        run: |
-          mkdir -p ./html
+        run: mkdir -p ./html
 
       - name: Rename problematic files
         run: |
@@ -44,6 +43,7 @@ jobs:
               console.log('Processing file: ' + file);
               if (file.endsWith('.html')) {
                 let newName = removePolishChars(file).replace(problematicChars, '');
+                console.log('New name: ' + newName);
                 fs.renameSync(filePath, path.join(directory, newName));
                 console.log('Renamed: ' + file + ' -> ' + newName);
               }
@@ -53,6 +53,9 @@ jobs:
             process.exit(1);
           }
           "
+
+      - name: Check Git status
+        run: git status
 
       - name: Commit changes
         run: |
