@@ -2,7 +2,7 @@ name: Rename Files
 on:
   push:
     paths:
-      - "*.html"
+      - "html/*.html"
   workflow_dispatch:
 permissions:
   contents: write
@@ -18,19 +18,18 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
-        run: npm install
-
       - name: Rename HTML files
         run: |
           node -e "
           const fs = require('fs');
           const path = require('path');
           const problematicChars = /[^\w.-]/g;
-          fs.readdirSync('./').forEach(file => {
+          const directory = './html';
+          fs.readdirSync(directory).forEach(file => {
+            const filePath = path.join(directory, file);
             if (file.endsWith('.html') && problematicChars.test(file)) {
               const newName = file.replace(problematicChars, '-');
-              fs.renameSync(file, newName);
+              fs.renameSync(filePath, path.join(directory, newName));
               console.log(`Renamed: ${file} -> ${newName}`);
             }
           });
