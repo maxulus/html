@@ -26,9 +26,9 @@ jobs:
           const path = require('path');
           const directory = '.'; 
           
-          // Wyrażenie regularne do wyszukiwania linków do plików .jpg w tagach og:image i twitter:image
-          const ogTagPattern = /<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([^\"]+\.jpg)[\"'][^>]*>/;
-          const twitterTagPattern = /<meta[^>]*name=[\"']twitter:image[\"'][^>]*content=[\"']([^\"]+\.jpg)[\"'][^>]*>/;
+          // Wyrażenie regularne do wyszukiwania linków do plików .jpg, .jpeg, .png, .gif w tagach og:image i twitter:image
+          const ogTagPattern = /<meta[^>]*property=[\"']og:image[\"'][^>]*content=[\"']([^\"]+\.(jpg|jpeg|png|gif))[\"'][^>]*>/;
+          const twitterTagPattern = /<meta[^>]*name=[\"']twitter:image[\"'][^>]*content=[\"']([^\"]+\.(jpg|jpeg|png|gif))[\"'][^>]*>/;
           
           let changesMade = false;  // Flaga oznaczająca, czy dokonano zmian
           
@@ -57,6 +57,7 @@ jobs:
                   }
                 } else {
                   console.log('No image link found in ' + filePath);
+                  console.log(content);  // Dodano logowanie treści pliku w celu debugowania
                 }
               }
             });
