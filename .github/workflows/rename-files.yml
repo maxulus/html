@@ -1,4 +1,4 @@
-name: Rename Files and Add Open Graph Tags
+name: Rename Files
 on:
   push:
     branches:
@@ -9,7 +9,7 @@ on:
 permissions:
   contents: write
 jobs:
-  process-html-files:
+  rename-files:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: List files in root directory before processing
+      - name: List files in root directory before renaming
         run: ls -la
 
       - name: Rename problematic files
@@ -39,62 +39,21 @@ jobs:
           };
           if (fs.existsSync(directory)) {
             const files = fs.readdirSync(directory);
+            console.log('Files in directory:', files);
             files.forEach(file => {
               const filePath = path.join(directory, file);
+              console.log('Processing file: ' + filePath);
               if (file.endsWith('.html') && file !== 'index.html') {
                 let newName = removePolishChars(file).replace(problematicChars, '');
                 newName = newName.replace(/html+$/, ''); // Usuń wszystkie wystąpienia "html" na końcu
                 newName += '.html'; // Dodaj jedno "html" na końcu
+                console.log('New name: ' + newName);
                 fs.renameSync(filePath, path.join(directory, newName));
+                console.log('Renamed: ' + filePath + ' -> ' + path.join(directory, newName));
               }
             });
           } else {
             console.error('Directory not found: ' + directory);
-            process.exit(1);
-          }
-          "
-
-      - name: Add Open Graph Tags to HTML files
-        run: |
-          node -e "
-          const fs = require('fs');
-          const path = require('path');
-          const directory = '.';
-
-          const addOpenGraphTags = (htmlContent, fileName) => {
-            const ogTitle = 'Generated File: ' + fileName;
-            const ogDescription = 'This is a description for ' + fileName;
-            const ogImage = 'https://example.com/path-to-image.jpg'; // Podmień na właściwy link do obrazka
-            const ogUrl = 'https://example.com/' + fileName;
-
-            const ogTags = \`
-<meta property='og:title' content='\${ogTitle}' />
-<meta property='og:description' content='\${ogDescription}' />
-<meta property='og:image' content='\${ogImage}' />
-<meta property='og:url' content='\${ogUrl}' />
-\`;
-
-            if (htmlContent.includes('<head>')) {
-              return htmlContent.replace('<head>', \`<head>\${ogTags}\`);
-            } else {
-              console.error('No <head> tag found in file:', fileName);
-              return htmlContent;
-            }
-          };
-
-          if (fs.existsSync(directory)) {
-            const files = fs.readdirSync(directory);
-            files.forEach(file => {
-              const filePath = path.join(directory, file);
-              if (file.endsWith('.html') && file !== 'index.html') {
-                const htmlContent = fs.readFileSync(filePath, 'utf-8');
-                const updatedContent = addOpenGraphTags(htmlContent, file);
-                fs.writeFileSync(filePath, updatedContent, 'utf-8');
-                console.log('Added Open Graph Tags to:', file);
-              }
-            });
-          } else {
-            console.error('Directory not found:', directory);
             process.exit(1);
           }
           "
@@ -107,7 +66,7 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Processed HTML files: renamed and added Open Graph Tags" || echo "No changes to commit"
+          git commit -m "Rename problematic HTML files" || echo "No changes to commit"
 
       - name: Push changes
         run: git push
