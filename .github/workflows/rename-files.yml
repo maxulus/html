@@ -45,7 +45,8 @@ jobs:
               console.log('Processing file: ' + filePath);
               if (file.endsWith('.html') && file !== 'index.html') {
                 let newName = removePolishChars(file).replace(problematicChars, '');
-                newName = newName.replace(/\.html$/, '') + '.html'; // Zachowaj kropkę przed rozszerzeniem
+                newName = newName.replace(/html+$/, ''); // Usuń wszystkie wystąpienia "html" na końcu
+                newName += '.html'; // Dodaj jedno "html" na końcu
                 console.log('New name: ' + newName);
                 fs.renameSync(filePath, path.join(directory, newName));
                 console.log('Renamed: ' + filePath + ' -> ' + path.join(directory, newName));
