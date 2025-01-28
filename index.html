@@ -69,9 +69,8 @@
                 const files = await response.json();
                 let counter = 1;
 
-                files
-                    .filter(file => file.name.endsWith(".html") && file.name !== "index.html")
-                    .forEach(file => {
+                for (const file of files) {
+                    if (file.name.endsWith(".html") && file.name !== "index.html") {
                         const li = document.createElement("li");
 
                         // Numeracja
@@ -87,10 +86,16 @@
                         link.textContent = file.name;
                         li.appendChild(link);
 
+                        // Pobierz pierwszy obrazek z pliku HTML
+                        const imageUrl = await extractFirstImage(fileUrl);
+
                         // Link WhatsApp
                         const whatsappLink = document.createElement("a");
                         whatsappLink.classList.add("share");
-                        whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent("Check this out: " + fileUrl)}`;
+                        const whatsappText = imageUrl
+                            ? `Check this out: ${fileUrl}\n\nMedia: ${imageUrl}`
+                            : `Check this out: ${fileUrl}`;
+                        whatsappLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappText)}`;
                         whatsappLink.target = "_blank";
                         whatsappLink.innerHTML = `<span class="icon">📱</span>WhatsApp`;
                         li.appendChild(whatsappLink);
@@ -106,10 +111,26 @@
 
                         fileListElement.appendChild(li);
                         counter++;
-                    });
+                    }
+                }
             } catch (error) {
                 console.error("Error fetching file list:", error);
                 fileListElement.innerHTML = `<li>Failed to load file list. Please try again later.</li>`;
+            }
+        }
+
+        async function extractFirstImage(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch HTML content");
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const img = doc.querySelector('img'); // Znajdź pierwszy obrazek w pliku HTML
+                return img ? img.src : null; // Jeśli znajdziesz obrazek, zwróć jego źródło
+            } catch (error) {
+                console.error(`Error extracting image from ${url}:`, error);
+                return null; // W przypadku błędu zwróć null
             }
         }
 
