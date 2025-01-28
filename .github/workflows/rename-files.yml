@@ -68,16 +68,16 @@ jobs:
             const ogImage = 'https://example.com/path-to-image.jpg'; // Podmień na odpowiednią ścieżkę
             const ogUrl = 'https://example.com/' + fileName;
 
-            const ogTags = `
-<meta property='og:title' content='${ogTitle}' />
-<meta property='og:description' content='${ogDescription}' />
-<meta property='og:image' content='${ogImage}' />
-<meta property='og:url' content='${ogUrl}' />
-`;
+            const ogTags = \`
+<meta property='og:title' content='\${ogTitle}' />
+<meta property='og:description' content='\${ogDescription}' />
+<meta property='og:image' content='\${ogImage}' />
+<meta property='og:url' content='\${ogUrl}' />
+\`;
 
             // Dodaj tagi do sekcji <head>
             if (htmlContent.includes('<head>')) {
-              return htmlContent.replace('<head>', `<head>${ogTags}`);
+              return htmlContent.replace('<head>', \`<head>\${ogTags}\`);
             } else {
               console.error('No <head> tag found in file:', fileName);
               return htmlContent;
