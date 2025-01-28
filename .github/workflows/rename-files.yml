@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  
 jobs:
   rename-files:
     runs-on: ubuntu-latest
@@ -23,7 +24,7 @@ jobs:
           node -e "
           const fs = require('fs');
           const path = require('path');
-          const problematicChars = /[^\w.-]/g;
+          const problematicChars = /[^\\w.-]/g;
           const directory = './html';
           if (fs.existsSync(directory)) {
             fs.readdirSync(directory).forEach(file => {
