@@ -24,7 +24,7 @@ jobs:
           node -e "
           const fs = require('fs');
           const path = require('path');
-          const directory = '.';
+          const directory = '.'; 
           const ogTag = '<meta property=\"og:image\" content=\"https://example.com/thumbnail.jpg\">';
           if (fs.existsSync(directory)) {
             const files = fs.readdirSync(directory);
@@ -36,7 +36,7 @@ jobs:
                   content = content.replace('</head>', ogTag + '</head>');
                   fs.writeFileSync(filePath, content, 'utf8');
                   console.log('Added Open Graph tags to: ' + filePath);
-                  // Dodaj logowanie zawartości pliku
+                  // Log the new file content after modification
                   console.log('New file content:\n' + content);
                 }
               }
