@@ -4,8 +4,8 @@ on:
     paths:
       - "*.html"
   workflow_dispatch:
-
-
+permissions:
+  contents: write
 jobs:
   rename-files:
     runs-on: ubuntu-latest
