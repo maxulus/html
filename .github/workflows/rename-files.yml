@@ -61,11 +61,10 @@ jobs:
           const path = require('path');
           const directory = '.';
 
-          // Funkcja dodająca Open Graph Tags
           const addOpenGraphTags = (htmlContent, fileName) => {
             const ogTitle = 'Generated File: ' + fileName;
             const ogDescription = 'This is a description for ' + fileName;
-            const ogImage = 'https://example.com/path-to-image.jpg'; // Podmień na odpowiednią ścieżkę
+            const ogImage = 'https://example.com/path-to-image.jpg'; // Podmień na właściwy link do obrazka
             const ogUrl = 'https://example.com/' + fileName;
 
             const ogTags = \`
@@ -75,7 +74,6 @@ jobs:
 <meta property='og:url' content='\${ogUrl}' />
 \`;
 
-            // Dodaj tagi do sekcji <head>
             if (htmlContent.includes('<head>')) {
               return htmlContent.replace('<head>', \`<head>\${ogTags}\`);
             } else {
@@ -84,7 +82,6 @@ jobs:
             }
           };
 
-          // Przetwarzanie plików HTML
           if (fs.existsSync(directory)) {
             const files = fs.readdirSync(directory);
             files.forEach(file => {
