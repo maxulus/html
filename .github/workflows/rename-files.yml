@@ -1,4 +1,5 @@
 name: Rename Files
+
 on:
   push:
     branches:
@@ -20,8 +21,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Create html directory if it does not exist
-        run: mkdir -p ./html
+      - name: List files in html directory
+        run: ls -la ./html
 
       - name: Rename problematic files
         run: |
@@ -43,7 +44,7 @@ jobs:
             files.forEach(file => {
               const filePath = path.join(directory, file);
               console.log('Processing file: ' + filePath);
-              if (file.endsWith('.html')) {
+              if (file === 'Elon Musk, to najpotężniejszy człowiek świata. Zobacz jego biznesy, przyjaciół i ambicje (27.01.2025 15：41：08).html') {
                 let newName = removePolishChars(file).replace(problematicChars, '');
                 console.log('New name: ' + newName);
                 fs.renameSync(filePath, path.join(directory, newName));
