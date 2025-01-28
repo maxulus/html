@@ -34,7 +34,8 @@ jobs:
             const directory = './';  // Adjust this to point to the correct folder
 
             // Regular expression to find .jpg image links in meta tags
-            const metaTagPattern = /<meta[^>]*content=['\"]([^'\"]+\.jpg)['\"][^>]*>/i;
+            const metaTagPattern = /<meta[^>]*content=['\"]([^'\"]+\.(jpg|jpeg|png))['\"][^>]*>/i;
+
             
             let changesMade = false;  // Flag to indicate whether changes were made
             
