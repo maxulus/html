@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "name": "html-file-renamer",
+  "description": "A project to rename HTML files with problematic characters.",
+  "exports": "index.js",
+  "main": "index.js",
+  "bugs": {
+    "url": "https://github.com/maxulus",
+    "email": "maxulus@op.pl"
+  },
+  "author": {
+    "name": "maxulus",
+    "url": "maxulus@op.pl",
+    "email": "maxulus@op.pl"
+  }
+}
