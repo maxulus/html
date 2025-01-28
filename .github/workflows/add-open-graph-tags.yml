@@ -36,6 +36,8 @@ jobs:
                   content = content.replace('</head>', ogTag + '</head>');
                   fs.writeFileSync(filePath, content, 'utf8');
                   console.log('Added Open Graph tags to: ' + filePath);
+                  // Dodaj logowanie zawartości pliku
+                  console.log('New file content:\n' + content);
                 }
               }
             });
@@ -44,3 +46,4 @@ jobs:
             process.exit(1);
           }
           "
+        shell: /usr/bin/bash -e {0}
