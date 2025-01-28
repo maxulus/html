@@ -36,18 +36,90 @@
     <script>
         const repoOwner = "maxulus"; // Nazwa użytkownika
         const repoName = "html";     // Nazwa repozytorium
+        const token = ""; // Tutaj możesz wpisać swój GitHub Personal Access Token, jeśli repozytorium jest prywatne
 
         async function fetchFileList() {
             const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const headers = token ? { Authorization: `token ${token}` } : {};
             const fileListElement = document.getElementById("file-list");
 
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(apiUrl, { headers });
                 if (!response.ok) throw new Error("Failed to fetch file list");
 
                 const files = await response.json();
                 let counter = 1;
 
+                for (const file of files) {
+                    if (file.name.endsWith(".html")) {
+                        // Sprawdzamy, czy nazwa pliku jest problematyczna
+                        if (isProblematic(file.name)) {
+                            const newName = `plik-${counter}.html`;
+                            await renameFile(file.name, newName);
+                            counter++;
+                        }
+                    }
+                }
+
+                // Po zmianie nazw plików odświeżamy listę
+                await generateFileList();
+            } catch (error) {
+                console.error("Error fetching file list:", error);
+                fileListElement.innerHTML = `<li>Failed to load file list. Please try again later.</li>`;
+            }
+        }
+
+        function isProblematic(filename) {
+            // Weryfikujemy, czy nazwa pliku zawiera spacje, polskie znaki lub znaki specjalne
+            return /[^\w.-]/.test(filename);
+        }
+
+        async function renameFile(oldName, newName) {
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${oldName}`;
+            const headers = {
+                Authorization: `token ${token}`,
+                "Content-Type": "application/json",
+            };
+
+            const response = await fetch(apiUrl, { headers });
+            if (!response.ok) {
+                console.error(`Failed to fetch file content for renaming: ${oldName}`);
+                return;
+            }
+
+            const fileData = await response.json();
+            const updateUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${oldName}`;
+            const body = {
+                message: `Renamed ${oldName} to ${newName}`,
+                sha: fileData.sha,
+                content: fileData.content,
+                path: newName,
+            };
+
+            const renameResponse = await fetch(updateUrl, {
+                method: "PUT",
+                headers,
+                body: JSON.stringify(body),
+            });
+
+            if (!renameResponse.ok) {
+                console.error(`Failed to rename file: ${oldName}`);
+            }
+        }
+
+        async function generateFileList() {
+            const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/`;
+            const headers = token ? { Authorization: `token ${token}` } : {};
+            const fileListElement = document.getElementById("file-list");
+
+            try {
+                const response = await fetch(apiUrl, { headers });
+                if (!response.ok) throw new Error("Failed to fetch file list");
+
+                const files = await response.json();
+                fileListElement.innerHTML = ""; // Czyszczenie listy przed ponownym wygenerowaniem
+
+                let counter = 1;
                 files
                     .filter(file => file.name.endsWith(".html"))
                     .forEach(file => {
@@ -59,31 +131,17 @@
                         numberSpan.textContent = `${counter}. `;
                         li.appendChild(numberSpan);
 
-                        // Link do pliku (kodowanie URL)
-                        const fileUrl = `https://${repoOwner}.github.io/${repoName}/${encodeURIComponent(file.name)}`;
+                        // Link do pliku
                         const link = document.createElement("a");
-                        link.href = fileUrl;
+                        link.href = `https://${repoOwner}.github.io/${repoName}/${file.name}`;
                         link.textContent = file.name;
                         li.appendChild(link);
-
-                        // Przycisk udostępniania (kodowanie URL)
-                        const shareLink = document.createElement("a");
-                        shareLink.classList.add("share");
-                        const whatsappMessage = `Check this out: ${fileUrl}`;
-                        shareLink.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(whatsappMessage)}`;
-                        shareLink.target = "_blank";
-                        shareLink.innerHTML = `
-                            <span class="share-icon">📱</span>
-                            Share on WhatsApp
-                        `;
-                        li.appendChild(shareLink);
 
                         fileListElement.appendChild(li);
                         counter++;
                     });
             } catch (error) {
-                console.error("Error fetching file list:", error);
-                fileListElement.innerHTML = `<li>Failed to load file list. Please try again later.</li>`;
+                console.error("Error generating file list:", error);
             }
         }
 
