@@ -1,4 +1,4 @@
-name: Rename Files
+name: Rename Files and Add Meta Description
 on:
   push:
     branches:
@@ -20,14 +20,18 @@ jobs:
         with:
           node-version: 18
 
+      - name: Install cheerio
+        run: npm install cheerio
+
       - name: List files in root directory before renaming
         run: ls -la
 
-      - name: Rename problematic files
+      - name: Rename problematic files and add meta description
         run: |
           node -e "
           const fs = require('fs');
           const path = require('path');
+          const cheerio = require('cheerio');
           const problematicChars = /[^a-zA-Z0-9]/g;
           const directory = '.';
           const removePolishChars = (str) => {
@@ -37,6 +41,14 @@ jobs:
             };
             return str.replace(/[ąćęłńóśźżĄĆĘŁŃÓŚŹŻ]/g, char => polishChars[char] || char);
           };
+          const generateMetaDescription = (filePath) => {
+            const content = fs.readFileSync(filePath, 'utf8');
+            const $ = cheerio.load(content);
+            let description = $('p').first().text() || $('h1').first().text() || $('h2').first().text() || '';
+            description = description.replace(/[\r\n\t]+/g, ' ').trim();
+            description = description.substring(0, 160);
+            return `<meta name=\"description\" content=\"${description}\">`;
+          };
           if (fs.existsSync(directory)) {
             const files = fs.readdirSync(directory);
             console.log('Files in directory:', files);
@@ -45,9 +57,16 @@ jobs:
               console.log('Processing file: ' + filePath);
               if (file.endsWith('.html') && file !== 'index.html') {
                 let newName = removePolishChars(file).replace(problematicChars, '');
-                newName = newName.replace(/html+$/, ''); // Usuń wszystkie wystąpienia "html" na końcu
-                newName += '.html'; // Dodaj jedno "html" na końcu
+                newName = newName.replace(/html+$/, '');
+                newName += '.html';
                 console.log('New name: ' + newName);
+                const metaDescription = generateMetaDescription(filePath);
+                let content = fs.readFileSync(filePath, 'utf8');
+                const headEndIndex = content.indexOf('</head>');
+                if (headEndIndex !== -1) {
+                  content = content.slice(0, headEndIndex) + metaDescription + content.slice(headEndIndex);
+                  fs.writeFileSync(path.join(directory, newName), content);
+                }
                 fs.renameSync(filePath, path.join(directory, newName));
                 console.log('Renamed: ' + filePath + ' -> ' + path.join(directory, newName));
               }
@@ -66,7 +85,7 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
           git add .
-          git commit -m "Rename problematic HTML files" || echo "No changes to commit"
+          git commit -m "Rename problematic HTML files and add meta descriptions" || echo "No changes to commit"
 
       - name: Push changes
         run: git push
